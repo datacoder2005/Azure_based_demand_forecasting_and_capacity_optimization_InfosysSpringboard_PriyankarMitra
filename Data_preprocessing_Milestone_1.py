@@ -49,3 +49,4 @@ df = df.reset_index(drop=True)
 
 print(df.isnull().sum())
 print(df.head())
+
