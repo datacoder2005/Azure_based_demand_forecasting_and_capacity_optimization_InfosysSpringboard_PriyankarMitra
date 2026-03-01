@@ -4,6 +4,7 @@
 
 This project focuses on building a predictive system to forecast Azure Compute and Storage demand across global regions. The objective is to support data-driven capacity provisioning decisions, reduce over- and under-investment in infrastructure, and improve overall forecasting accuracy.
 
+
 ## Milestone 1 — Data Collection & Preparation (Completed)
 
 ### Data Collection
@@ -17,3 +18,22 @@ This project focuses on building a predictive system to forecast Azure Compute a
 - Standardized region names and removed duplicate records to ensure categorical consistency.  
 - Handled missing values using time-series interpolation and recalculated derived cost metrics.  
 - Validated metric relationships (utilization, headroom, wasted capacity cost) to ensure data integrity and model readiness.  
+
+
+## Milestone 2 — Feature Engineering & Exploratory Analysis (Completed)
+
+### Feature Engineering
+
+- Created time-based features (year, month, weekday, quarter, day-of-year) to capture temporal demand patterns.  
+- Engineered lag features (lag_1, lag_7, lag_30) to model short-term memory and weekly/monthly demand cycles.  
+- Computed rolling statistics (7-day and 30-day rolling mean and standard deviation) to capture trend and volatility.  
+- Developed percentile-based capacity indicators (capacity risk flag, underutilization flag) and a continuous utilization gap metric for decision support.  
+
+### Statistical Tests & Model Justification
+
+- Conducted stationarity testing (ADF test) across all 64 region-service time series, confirming majority non-stationary behavior and the need for differencing-based models.  
+- Performed seasonal strength analysis, identifying strong weekly seasonality across regions.  
+- Evaluated autocorrelation at lags 1, 7, and 30, confirming dominant weekly dependency patterns.  
+- Analyzed macro-variable correlations and multicollinearity to select optimal features and modeling strategy.  
+
+These analyses provide statistical justification for using SARIMA (with seasonal period = 7) and gradient boosting models (e.g., XGBoost) in the next milestone.
