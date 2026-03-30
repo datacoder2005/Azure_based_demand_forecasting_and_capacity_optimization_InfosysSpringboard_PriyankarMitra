@@ -35,7 +35,8 @@ model/         → Trained model & feature columns
 scheduler/     → Daily automation script  
 monitoring/    → Model performance tracking  
 retraining/    → Model retraining pipeline  
-documentation/ → Reports / project docs  
+documentation/ → Reports / project docs
+Infosys_project.ipynb -> Data preprocessing,feature engineering and model building code 
 ```
 
 ---
