@@ -836,10 +836,6 @@ with tab5:
                                      mode="lines+markers"), secondary_y=True)
     fig_risk_ts.update_layout(**PLOTLY_LAYOUT, title="Monthly Risk Events, Spikes & Incidents",
                               barmode="group", height=360)
-    fig_risk_ts.update_yaxes(title_text="Count", secondary_y=False,
-                             gridcolor="#1e3060", tickfont=dict(color="#a0b4d0"))
-    fig_risk_ts.update_yaxes(title_text="Incidents", secondary_y=True,
-                             tickfont=dict(color="#a78bfa"))
     st.plotly_chart(fig_risk_ts, use_container_width=True)
 
     # Z-Score anomaly scatter
@@ -847,8 +843,10 @@ with tab5:
                 unsafe_allow_html=True)
     plot_df = dff.dropna(subset=["z_score"]).copy()
     spike_df = plot_df[plot_df["usage_spike"] == 1]
-    normal_df = plot_df[plot_df["usage_spike"] == 0].sample(
-        min(5000, len(plot_df)), random_state=42)
+
+    normal_df = plot_df[plot_df["usage_spike"] == 0]
+    if len(normal_df) > 5000:
+        normal_df = normal_df.sample(5000, random_state=42)
 
     fig_zscore = go.Figure()
     fig_zscore.add_trace(go.Scatter(
@@ -859,72 +857,91 @@ with tab5:
     fig_zscore.add_trace(go.Scatter(
         x=spike_df["date"], y=spike_df["z_score"],
         mode="markers", name="Spike / Anomaly",
-        marker=dict(color="#ef4444", size=6, opacity=0.8, symbol="diamond")
+        marker=dict(color="#ef4444", size=6, opacity=0.8)
     ))
-    fig_zscore.add_hline(y=2, line_dash="dash",
-                         line_color="#f59e0b", annotation_text="+2σ")
-    fig_zscore.add_hline(y=-2, line_dash="dash",
-                         line_color="#f59e0b", annotation_text="-2σ")
     fig_zscore.update_layout(
         **PLOTLY_LAYOUT, title="Z-Score Anomaly Plot (sampled)", height=360)
     st.plotly_chart(fig_zscore, use_container_width=True)
 
-    # Alert list
+    # Alerts
     st.markdown("<div class='section-header'>RECENT HIGH-RISK ALERTS</div>",
                 unsafe_allow_html=True)
-    recent_alerts = (
-        high_risk.sort_values("date", ascending=False)
-        .head(20)[["date_str", "region", "service_type", "utilization_pct",
-                   "usage_units", "headroom_units", "incident_count"]]
-    )
+    recent_alerts = high_risk.sort_values("date", ascending=False).head(20)
+
     for _, row in recent_alerts.iterrows():
         util_pct = row["utilization_pct"] * 100
         severity = "🔴 CRITICAL" if util_pct >= 90 else "🟡 WARNING"
         cls = "alert-critical" if util_pct >= 90 else "alert-warn"
+
         st.markdown(
-            f"<div class='{cls}'>{severity} &nbsp;|&nbsp; "
-            f"<b>{row['date_str']}</b> &nbsp;|&nbsp; "
-            f"{row['region']} / {row['service_type']} &nbsp;|&nbsp; "
-            f"Util: <b>{util_pct:.1f}%</b> &nbsp;|&nbsp; "
-            f"Headroom: {row['headroom_units']:,.0f} units &nbsp;|&nbsp; "
-            f"Incidents: {int(row['incident_count'])}</div>",
+            f"<div class='{cls}'>{severity} | {row['date_str']} | "
+            f"{row['region']} / {row['service_type']} | "
+            f"Util: {util_pct:.1f}%</div>",
             unsafe_allow_html=True
         )
 
-    # Macro pressure correlation
+    # =========================
+    # 🔥 FIXED MACRO SCATTER
+    # =========================
     st.markdown("<div class='section-header'>MACRO ECONOMIC PRESSURE CORRELATION</div>",
                 unsafe_allow_html=True)
+
     col1, col2 = st.columns(2)
+
     with col1:
-        fig_macro = px.scatter(
-            dff.sample(min(3000, len(dff)), random_state=1),
-            x="macro_pressure", y="usage_units",
-            color="service_type",
-            color_discrete_sequence=COLORS,
-            trendline="ols",
-            trendline_scope="overall",
-            labels={"macro_pressure": "Macro Pressure Index",
-                    "usage_units": "Usage Units"}
-        )
-        fig_macro.update_layout(
-            **PLOTLY_LAYOUT, title="Macro Pressure vs Usage", height=320)
-        st.plotly_chart(fig_macro, use_container_width=True)
+        try:
+            # Fix datatype
+            dff["usage_units"] = pd.to_numeric(dff["usage_units"], errors="coerce")
+            dff["macro_pressure"] = pd.to_numeric(dff["macro_pressure"], errors="coerce")
+
+            # Clean data
+            plot_df = dff.dropna(subset=["macro_pressure", "usage_units"]).copy()
+
+            # Safe sampling
+            if len(plot_df) > 3000:
+                plot_df = plot_df.sample(3000, random_state=1)
+
+            fig_macro = px.scatter(
+                plot_df,
+                x="macro_pressure",
+                y="usage_units",
+                color="service_type",
+                color_discrete_sequence=COLORS,
+                labels={
+                    "macro_pressure": "Macro Pressure Index",
+                    "usage_units": "Usage Units"
+                }
+            )
+
+            fig_macro.update_layout(
+                **PLOTLY_LAYOUT,
+                title="Macro Pressure vs Usage",
+                height=320
+            )
+
+            st.plotly_chart(fig_macro, use_container_width=True)
+
+        except Exception as e:
+            st.error(f"Plot error: {e}")
 
     with col2:
         corr_cols = ["usage_units", "utilization_pct", "macro_pressure",
                      "it_spending_index", "enterprise_demand_index",
                      "internet_traffic_growth", "gdp_growth_rate", "daily_growth_rate"]
+
         corr_matrix = dff[corr_cols].corr()
+
         fig_corr = go.Figure(go.Heatmap(
             z=corr_matrix.values,
-            x=corr_matrix.columns.tolist(),
-            y=corr_matrix.index.tolist(),
-            colorscale="RdBu", zmin=-1, zmax=1,
-            text=corr_matrix.round(2).values,
-            texttemplate="%{text}",
-            textfont=dict(size=9),
-            colorbar=dict(title="r")
+            x=corr_matrix.columns,
+            y=corr_matrix.index,
+            colorscale="RdBu", zmin=-1, zmax=1
         ))
+
         fig_corr.update_layout(
-            **PLOTLY_LAYOUT, title="Feature Correlation Matrix", height=320)
+            **PLOTLY_LAYOUT,
+            title="Feature Correlation Matrix",
+            height=320
+        )
+
         st.plotly_chart(fig_corr, use_container_width=True)
