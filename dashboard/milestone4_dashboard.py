@@ -197,7 +197,7 @@ hr {
 # DATA LOADING
 # ─────────────────────────────────────────────
 @st.cache_data
-def load_data(path="processed_data.csv"):
+def load_data(path="dashboard/processed_data.csv"):
     df = pd.read_csv(path, parse_dates=["timestamp"])
     df["date"] = pd.to_datetime(df["timestamp"])
     df["year_month"] = df["date"].dt.to_period("M").astype(str)
@@ -205,21 +205,21 @@ def load_data(path="processed_data.csv"):
 
 
 @st.cache_data
-def load_forecast(path="../data/forecast_output.csv"):
+def load_forecast(path="dashboard/forecast_output.csv"):
     df = pd.read_csv(path, parse_dates=["timestamp"])
     df["date"] = pd.to_datetime(df["timestamp"])
     return df
 
 
 try:
-    forecast_df = load_forecast("../data/forecast_output.csv")
+    forecast_df = load_forecast("dashboard/forecast_output.csv")
     FORECAST_AVAILABLE = True
 except:
     FORECAST_AVAILABLE = False
 
 # Try loading; fall back to synthetic demo if file missing
 try:
-    df = load_data("processed_data.csv")
+    df = load_data("dashboard/processed_data.csv")
     DATA_LOADED = True
 except FileNotFoundError:
     st.warning(
@@ -671,8 +671,8 @@ with tab4:
     model = None
     model_loaded = False
     try:
-        if os.path.exists("../model/xgb_model.pkl"):
-            model = joblib.load("../model/xgb_model.pkl")
+        if os.path.exists("dashboard/xgb_model.pkl"):
+            model = joblib.load("dashboard/xgb_model.pkl")
             model_loaded = True
     except:
         pass
@@ -700,7 +700,7 @@ with tab4:
             fi = model.feature_importances_
 
             try:
-                with open("../model/feature_cols.json", "r") as f:
+                with open("dashboard/feature_cols.json", "r") as f:
                     feature_cols_model = json.load(f)
             except:
                 feature_cols_model = [f"f_{i}" for i in range(len(fi))]
