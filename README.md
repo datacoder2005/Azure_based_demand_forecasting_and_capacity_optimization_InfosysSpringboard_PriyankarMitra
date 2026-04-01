@@ -1,13 +1,15 @@
-# 🚀 Azure Demand Forecasting & Capacity Optimization System
+# Azure Demand Forecasting & Capacity Optimization System
 
-## 📌 Project Overview
+## Project Overview
 
 This project builds an end-to-end predictive system to forecast Azure Compute and Storage demand across global regions.
 The goal is to enable **data-driven capacity planning**, reduce **over/under-provisioning**, and improve **forecast accuracy** using statistical and machine learning models.
 
+Live Working Dashboard : https://azureanalytics.streamlit.app/
+
 ---
 
-## 🏗️ Project Architecture
+## Project Architecture
 
 * Data Collection & Preprocessing
 * Feature Engineering (Time + Lag + Rolling + Macro Features)
@@ -41,7 +43,7 @@ Infosys_project.ipynb -> Data preprocessing,feature engineering and model buildi
 
 ---
 
-## 📊 Milestone 1 — Data Collection & Preparation ✅
+##  Milestone 1 — Data Collection & Preparation ✅
 
 ### 🔹 Data Collection
 
@@ -57,7 +59,7 @@ Infosys_project.ipynb -> Data preprocessing,feature engineering and model buildi
 
 ---
 
-## 📈 Milestone 2 — Feature Engineering & EDA ✅
+##  Milestone 2 — Feature Engineering & EDA ✅
 
 ### 🔹 Feature Engineering
 
@@ -77,7 +79,7 @@ Infosys_project.ipynb -> Data preprocessing,feature engineering and model buildi
 
 ---
 
-## 🤖 Milestone 3 — Model Development & Forecasting ✅
+##  Milestone 3 — Model Development & Forecasting ✅
 
 ### 🔹 Time Series Models
 
@@ -99,7 +101,7 @@ Infosys_project.ipynb -> Data preprocessing,feature engineering and model buildi
 
 ---
 
-## 🚀 Milestone 4 — Deployment & Automation ✅
+##  Milestone 4 — Deployment & Automation ✅
 
 ### 🔹 Dashboard (Streamlit)
 
@@ -130,7 +132,7 @@ Infosys_project.ipynb -> Data preprocessing,feature engineering and model buildi
 
 ---
 
-## ⚙️ How to Run the Project
+##  How to Run the Project
 
 ### 🔹 1. Install Dependencies
 
@@ -179,7 +181,7 @@ python scheduler/run_daily.py
 
 ---
 
-## 📊 Key Features
+##  Key Features
 
 * Multi-model forecasting (ARIMA, SARIMA, XGBoost)
 * Region-level demand prediction
@@ -190,15 +192,9 @@ python scheduler/run_daily.py
 
 ---
 
-## 🎯 Business Impact
+##  Business Impact
 
 * Improves infrastructure planning
 * Reduces over-provisioning costs
 * Identifies capacity risks early
 * Enables data-driven decision making
-
----
-
-## 📜 License
-
-MIT License
